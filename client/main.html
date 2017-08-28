@@ -1,0 +1,123 @@
+<head>
+  <title>@Chat</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .online-list{
+      border: none !important;
+    }
+
+    .online-list li {
+      background-color: #708090 !important;
+      border: none !important;
+      color: white;
+      font-size:1.5rem;
+    }
+
+    .online-list li a {
+      color: white !important;
+    }
+
+    .online-list li a:hover {
+      color: white !important;
+      text-decoration: underline;
+    }
+
+    .online-list li a i {
+      visibility:hidden;
+    }
+
+    .online-list li a:hover i {
+      visibility: visible;
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <nav class="red">
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">@Chat</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li clas="nav-item">
+            {{> loginButtons}}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+    <div class="row" style="margin-bottom:0;">
+
+      <div class="col s12 m4 l3" style="padding:0;"> <!-- Note that "m4 l3" was added -->
+        <div style="min-height: calc(100vh - 80px); width:100%; background-color:slategray">
+          <h4 style="color:white; margin-top:0;padding-top:15px; text-align:center; text-shadow: 1px 1px 3px #000;">Currently online</h4>
+          <hr>
+          {{> t_online}}
+        </div>
+      </div>
+
+      <div class="col s12 m8 l9">
+        {{> t_chat}}
+      </div>
+
+    </div>
+</body>
+
+<template name="t_chat">
+  <h3 style="margin-top:10px;"><i style="font-size:3rem;" class="material-icons">chat</i> Current chat: @public</h3>
+  <div id="chat-window" style="height:250px; overflow-y: scroll">
+    <ul class="collection">
+      {{#each messages}}
+        {{>t_msg}}
+      {{/each}}
+    </ul>
+  </div>
+  <hr>
+  <br><br>
+  <div class="row align-center">
+      <div class="col s7 m7 l7 offset-s1 offset-m2 offset-l2">
+        <span id="user-id">{{getUser}}:</span><input id="msg-box" type="text" name="msg-box" placeholder="Write your message">
+      </div>
+      <div class="col s1 m2 l2">
+        <a id="submit-message" class="waves-effect waves-light btn" style="margin-top:20px;">SEND <i style="font-size:1rem;" class="material-icons">send</i></a>
+      </div>
+  </div>
+</template>
+
+<template name="t_msg">
+  <li class="collection-item">
+    <span style="float:left">
+      {{text}}
+    </span>
+    <span style="float:right;">
+      {{formatDate createdAt}}
+    </span>
+    <div class="clearfix"></div>
+  </li>
+</template>
+
+<template name="t_online">
+  <div class="container">
+    <ul class="collection online-list">
+      <li class="collection-item">
+        <a href="#">@public
+          <i class="material-icons arrow-right">forward</i>
+        </a>
+      </li>
+      {{#each onlineUsers}}
+      <li class="collection-item">
+        {{>t_user}}
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+</template>
+
+
+<template name="t_user">
+    <a href="#">
+      @{{from}}
+      <i class="material-icons arrow-right">forward</i>
+    </a>
+</template>
