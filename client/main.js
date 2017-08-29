@@ -11,44 +11,20 @@ Accounts.ui.config({
 
 import './main.html';
 
-/*Template.t_header.onCreated(function helloOnCreated() {
-  // counter starts at 0
-  this.counter = new ReactiveVar(0);
-});
-
-Template.t_header.helpers({
-  counter() {
-    return Template.instance().counter.get();
-  },
-});
-
-Template.t_header.events({
-  'click button'(event, instance) {
-    // increment the counter when button is clicked
-    instance.counter.set(instance.counter.get() + 1);
-  },
-});
-*/
-
 /** CHAT **/
 
 Template.t_chat.onCreated(function (){
 
     this.usr = new ReactiveVar('Anonymous');
+    Session.setDefault('room', 'public');
 
     Meteor.subscribe('messages');
-    /*if (Meteor.user() == null){
-        this.usr = 'Anonymous';
-    } else {
-        this.usr = Meteor.user();
-    }*/
 });
 
 Template.t_chat.events({
 
     //on click
     'click #submit-message'(event, instance) {
-        event.preventDefault();
         // increment the counter when button is clicked
         //instance.counter.set(instance.counter.get() + 1);
 
@@ -56,15 +32,21 @@ Template.t_chat.events({
         if (msg == ''){
             alert('Can\'t be blank');
         } else {
-            Messages.insert({ "from": Meteor.user().username, "to": "public", "text": msg, createdAt: new Date() });
+            Messages.insert({ "from": Meteor.user().username, "to": Session.get('room'), "text": msg, createdAt: new Date() });
             instance.find('#msg-box').value = '';
         }
     },
 
-    //pressing enter
+    //pressing enter - better to be solved with only one method but I had problems calling method from another method
     'keypress input#msg-box': function (evt, instance) {
         if (evt.which === 13) {
-            Meteor.call(instance.view.template.__helpers.play);
+            msg = instance.find('#msg-box').value;
+            if (msg == ''){
+                alert('Can\'t be blank');
+            } else {
+                Messages.insert({ "from": Meteor.user().username, "to": Session.get('room'), "text": msg, createdAt: new Date() });
+                instance.find('#msg-box').value = '';
+            }
         }
     }
 
@@ -83,11 +65,16 @@ Template.t_chat.helpers({
     },
 
     messages() {
-      return Messages.find({}, {sort: {'createdAt': -1}});
+        let userName = Meteor.user().username;
+        if (Session.get('room') == 'public'){
+            return Messages.find({ 'to': 'public' }, {sort: {'createdAt': -1}});
+        } else {
+            return Messages.find({$or: [{$and: [{'from': Session.get('room')}, {'to': userName}]}, {$and: [{'to': Session.get('room')}, {'from': userName}]}]}, {sort: {'createdAt': -1}});
+        }
     },
 
-    play(){
-        alert('here');
+    room(){
+        return Session.get('room');
     }
 
 });
@@ -102,35 +89,20 @@ Template.t_msg.helpers({
 
 Template.t_online.onCreated(function () {
 
-    Meteor.subscribe('onlineUsers');
+    Meteor.subscribe('userStatus');
 
-    /*let mDate = moment(new Date().toISOString()).subtract(20, 'minutes').toDate();
-    let pDate = new Date();
-
-    console.log(pDate.toString());
-    console.log(mDate.toString());*/
-
-
-    //let online = Messages.find({"createdAt": {$gte: new Date(mDate).toISOString()}}, 'from');
-
-    //let mDate = moment(new Date().toISOString()).subtract(20, 'minutes').toDate();
-
-    //Meteor.subscribe('onlineUsers');
-
-    //let x = onlineUsers.find().fetch();
-    //console.log(onlineUsers);
-
-    /*Meteor.call('getOnlineUsers', function(err, response) {
-        console.log(response);
-    });*/
-
-
-    //console.log(online);
 });
 
 Template.t_online.helpers({
 
-    onlineUsers(){
+    onlineUsers() {
+        //exclude self and return online users
+        return Meteor.users.find({ $and: [ { "status.online": true }, {username: {$ne: Meteor.user().username} } ] });
+    }
+
+    // OLD ROUTINE FOR IDENTIFYING ONLINE USERS
+
+    /*onlineUsers(){
         const instance = Template.instance();
         //let msg = Messages.find({});
         let mDate = moment(new Date().toISOString()).subtract(30, 'minutes').toDate();
@@ -154,7 +126,13 @@ Template.t_online.helpers({
                 }
             }
         });
-
+        console.log(Meteor.user());
         return users;
-    },
+    },*/
+});
+
+Template.t_online.events({
+    'click .change-room'(event, instance) {
+        Session.set('room', event.target.getAttribute('ref'));
+    }
 });

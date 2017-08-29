@@ -47,6 +47,7 @@
       </div>
     </div>
   </nav>
+  {{#if currentUser}}
     <div class="row" style="margin-bottom:0;">
 
       <div class="col s12 m4 l3" style="padding:0;"> <!-- Note that "m4 l3" was added -->
@@ -62,10 +63,13 @@
       </div>
 
     </div>
+  {{else}}
+    <h3 class="center">Please log in to continue...</h3>
+  {{/if}}
 </body>
 
 <template name="t_chat">
-  <h3 style="margin-top:10px;"><i style="font-size:3rem;" class="material-icons">chat</i> Current chat: @public</h3>
+  <h3 style="margin-top:10px;"><i style="font-size:3rem;" class="material-icons">chat</i> Current chat: @{{ room }}</h3>
   <div id="chat-window" style="height:250px; overflow-y: scroll">
     <ul class="collection">
       {{#each messages}}
@@ -88,7 +92,7 @@
 <template name="t_msg">
   <li class="collection-item">
     <span style="float:left">
-      {{text}}
+      <strong>{{from}}</strong>: {{text}}
     </span>
     <span style="float:right;">
       {{formatDate createdAt}}
@@ -101,13 +105,13 @@
   <div class="container">
     <ul class="collection online-list">
       <li class="collection-item">
-        <a href="#">@public
+        <a ref="public" class="change-room" href="#">@public
           <i class="material-icons arrow-right">forward</i>
         </a>
       </li>
       {{#each onlineUsers}}
       <li class="collection-item">
-        {{>t_user}}
+          @{{>t_user}}
       </li>
       {{/each}}
     </ul>
@@ -116,8 +120,8 @@
 
 
 <template name="t_user">
-    <a href="#">
-      @{{from}}
+    <a class="change-room" ref="{{username}}" href="#">
+      {{username}}
       <i class="material-icons arrow-right">forward</i>
     </a>
 </template>

@@ -22,3 +22,5 @@ materialize:materialize@=0.99.0
 accounts-ui
 accounts-password
 momentjs:moment
+mizzao:user-status
+session
